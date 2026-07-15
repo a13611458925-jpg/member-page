@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>课题一：线上会员体验优化-天猫渠道</title>
+  <style>
+    :root {
+      --blue-1: #0c4fa1;
+      --blue-2: #1f77ff;
+      --blue-3: #4ea3ff;
+      --ink: #17324b;
+      --muted: #5f7b93;
+      --bg: #f4fbff;
+      --panel: #ffffff;
+      --line: #dcefff;
+      --good: #26b577;
+      --bad: #ff6b57;
+      --shadow: 0 16px 40px rgba(12, 79, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(135deg, #f5fbff 0%, #ecf7ff 100%);
+      overflow-x: hidden;
+    }
+    .page-stack { scroll-snap-type: y mandatory; }
+    .slide {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      padding: 26px 22px 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slide-content {
+      width: min(1400px, 100%);
+      border-radius: 24px;
+      background: rgba(255,255,255,0.94);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 28px 30px;
+      backdrop-filter: blur(8px);
+    }
+    .hero {
+      background: linear-gradient(120deg, var(--blue-1), var(--blue-2));
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position: absolute; right: -44px; top: -38px;
+      width: 240px; height: 240px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.28), transparent 70%);
+    }
+    .hero .slide-content {
+      background: transparent; box-shadow: none; border: 0; padding: 0;
+    }
+    .hero h1 { font-size: 34px; margin: 0 0 10px; }
+    .hero .meta { font-size: 17px; line-height: 1.8; opacity: 0.97; }
+    .section-title {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 22px; margin: 0 0 9px;
+    }
+    .section-title .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue-2), var(--blue-3));
+      box-shadow: 0 0 0 4px rgba(31,119,255,0.12);
+    }
+    .section-desc { margin: 0 0 16px; font-size: 13px; }
+    .text-block { margin-top: 18px; padding: 14px 16px; border-radius: 16px; background: #f7fbff; border: 1px solid var(--line); }
+    .text-block h3 { margin: 0 0 10px; font-size: 16px; color: var(--blue-1); }
+    .text-block p { margin: 0 0 8px; font-size: 14px; line-height: 1.8; color: var(--ink); }
+    .pic-row { display: grid; gap: 12px; margin-top: 14px; }
+    .pic-row .fig { background: #ffffff; border: 1px solid var(--line); border-radius: 16px; padding: 10px; }
+    .pic-row img { width: 100%; display: block; border-radius: 12px; object-fit: contain; max-height: 400px; background: #f7fbff; }
+    .pic-name { margin-top: 8px; text-align: center; font-size: 12px; color: var(--blue-1); font-weight: 600; }
+    .pic-row.big-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .pic-row.bad-row { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .tag { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:10px; }
+    .tag.good { background: rgba(38,181,119,0.12); color: var(--good); }
+    .tag.bad { background: rgba(255,107,87,0.12); color: var(--bad); }
+    .board-grid { display:grid; gap:14px; margin-top: 14px; }
+    .board { border:1px solid var(--line); border-radius:18px; padding:16px; background: linear-gradient(180deg, #ffffff, #f8fcff); margin-bottom: 12px; }
+    .board h4 { margin: 0 0 8px; font-size: 17px; color: var(--blue-1); }
+    .board ul { margin: 0; padding-left: 20px; }
+    .board li { margin-bottom: 10px; font-size: 13px; line-height: 1.95; }
+    .board .sub-list { margin-top: 6px; padding-left: 18px; }
+    .board .sub-list li { margin-bottom: 8px; }
+    .summary-grid { display:grid; gap:14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .summary-card { border:1px solid var(--line); border-radius:18px; padding:16px; background: linear-gradient(180deg, #ffffff, #f8fcff); }
+    .summary-card h4 { margin: 0 0 10px; font-size: 16px; color: var(--blue-1); }
+    .summary-card p { margin: 0 0 8px; font-size: 14px; line-height: 1.8; }
+    .controls { position: fixed; right: 20px; bottom: 20px; display:flex; gap:8px; z-index: 999; }
+    .controls button { border:0; border-radius:999px; padding:10px 14px; background: rgba(12, 79, 161, 0.95); color:white; box-shadow: 0 10px 24px rgba(0,0,0,0.2); cursor:pointer; font-size:13px; }
+    @media (max-width: 1100px) { .pic-row.big-5, .pic-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .board-grid, .summary-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) { .slide { padding: 14px 12px 44px; } .slide-content { padding: 18px; } .pic-row.big-5, .pic-row { grid-template-columns: 1fr; } .hero h1 { font-size: 24px; } }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button onclick="goPrev()">上一页</button>
+    <button onclick="goNext()">下一页</button>
+  </div>
+
+  <div class="page-stack">
+    <section class="slide hero">
+      <div class="slide-content">
+        <h1>课题一：线上会员体验优化 - 天猫渠道</h1>
+        <div class="meta">
+          品牌：理肤泉（La Roche-Posay）<br />
+          产品：B5修复霜<br />
+          提交人：杨冠茹
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-content">
+        <h2 class="section-title"><span class="dot"></span>Part 1｜体验较好的部分</h2>
+        <div class="text-block">
+          <h3>体验较好的环节</h3>
+          <p>① 赠品丰富，降低新品试错成本：有新人专属礼、生日礼、会员满额立减、0元优先试用、先试后买返券等。</p>
+          <p>② AI 一键测肤和专属推荐：消费者可以通过AI测试直观了解自己的肤质，并能一键把报告分享给在线美容顾问，获得1V1的个性化产品推荐。</p>
+          <div class="pic-row big-5">
+            <div class="fig"><img src="新建文件夹/1-1会员权益.jpg" alt="1-1会员权益" /><div class="pic-name">1-1会员权益</div></div>
+            <div class="fig"><img src="新建文件夹/1-2 0元优先试用.jpg" alt="1-2 0元优先试用" /><div class="pic-name">1-2 0元优先试用</div></div>
+            <div class="fig"><img src="新建文件夹/1-3AI测肤.jpg" alt="1-3AI测肤" /><div class="pic-name">1-3AI测肤</div></div>
+            <div class="fig"><img src="新建文件夹/1-4  AI测肤报告.jpg" alt="1-4 AI测肤报告" /><div class="pic-name">1-4 AI测肤报告</div></div>
+            <div class="fig"><img src="新建文件夹/1-5 AI测肤推荐.jpg" alt="1-5 AI测肤推荐" /><div class="pic-name">1-5 AI测肤推荐</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-content">
+        <h2 class="section-title"><span class="dot"></span>Part 1｜体验较差的部分</h2>
+        <div class="text-block">
+          <h3>体验较差的环节</h3>
+          <p>① 会员积分吸引力不足与等级视觉混乱：积分获取周期长、过期无提醒，且可兑换的商品多为小样、吸引力弱，导致用户持续签到和参与会员活动的动力低。此外，会员规则文字冗长、排版密集，不同等级的会员权益差别不够一目了然，缺乏升级吸引力。</p>
+          <p>② 购后会员沟通价值有限：购后的主动触达多以纯促销、优惠券群发为主，缺少敏感肌急需的科学护肤知识、手法指导及人性化的复购提醒，难以建立专业护肤品牌的信任感。</p>
+          <div class="pic-row bad-row">
+            <div class="fig"><img src="新建文件夹/1-1‘会员等级.jpg" alt="1-1‘会员等级" /><div class="pic-name">1-1‘会员等级</div></div>
+            <div class="fig"><img src="新建文件夹/1-1''商品兑礼.jpg" alt="1-1''商品兑礼" /><div class="pic-name">1-1''商品兑礼</div></div>
+            <div class="fig"><img src="新建文件夹/1-2’会员规则冗长.jpg" alt="1-2’会员规则冗长" /><div class="pic-name">1-2’会员规则冗长</div></div>
+            <div class="fig"><img src="新建文件夹/1-3‘派样.jpg" alt="1-3‘派样" /><div class="pic-name">1-3‘派样</div></div>
+            <div class="fig"><img src="新建文件夹/1-4’优惠券.jpg" alt="1-4’优惠券" /><div class="pic-name">1-4’优惠券</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-content">
+        <h2 class="section-title"><span class="dot"></span>Part 2｜优化一</h2>
+        <div class="board-grid">
+          <div class="board">
+            <h4>优化一：视觉轻量化升级与积分玩法趣味化</h4>
+            <ul>
+              <li><strong>痛点解决：</strong>解决会员规则文字冗长导致“看不懂、不想看”的问题，提升积分的实用价值，激发会员持续活跃与升级欲望。</li>
+              <li><strong>工具包应用：</strong>CRM玩法【兑礼 / 抽奖】 + CRM沟通【站内消息 / 站内短信】</li>
+              <li><strong>具体做法：</strong>
+                <ul class="sub-list">
+                  <li>权益视觉“减重”：将冗长的文字版会员规则，改用直观的“一页式等级权益对比图”（以理肤泉蓝白为主色调，突出高等级会员专属的“新品免费申领”及“专属线下护理体验通道”）。</li>
+                  <li>增设“积分抽奖”：开设常态化“100积分抽B5修复霜正装/限量周边”玩法，让零散积分会员也能参与，并在积分即将过期前7天，通过站内短信/消息温馨提醒“主人，您的XX积分即将过期，快来试试手气吧”，提升活跃度。</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-content">
+        <h2 class="section-title"><span class="dot"></span>Part 2｜优化二</h2>
+        <div class="board-grid">
+          <div class="board">
+            <h4>优化二：定制化会员加赠与科学搭配推荐</h4>
+            <ul>
+              <li><strong>痛点解决：</strong>提升会员购买明星单品时的尊享感，解决消费者购买单品后“不知道如何搭配、不买同品牌其他产品”的跨品转化痛点。</li>
+              <li><strong>工具包应用：</strong>CRM玩法【会员加赠 / 老客加赠】</li>
+              <li><strong>具体做法：</strong>
+                <ul class="sub-list">
+                  <li>会员尊享搭配礼遇：会员在天猫购买B5修复霜100ml大容量时，专享加赠“理肤泉B5特安洁面乳/爽肤水小样”，或加赠“理肤泉大哥大防晒乳小样（防晒作为敏感肌修护的最后一步至关重要）”。</li>
+                  <li>打造御敏闭环体验：通过“买B5霜送洁面/防晒”的满赠机制，向会员隐性科普“清洁-修护-防晒”的科学敏感肌护理链路，突出会员专属福利的同时，为同品牌其他品类成功铺路。</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-content">
+        <h2 class="section-title"><span class="dot"></span>Part 2｜优化三</h2>
+        <div class="board-grid">
+          <div class="board">
+            <h4>优化三：科学使用指导与跨品转化</h4>
+            <ul>
+              <li><strong>痛点解决：</strong>解决因质地厚重、消费者“不会使用导致闷痘”而产生的退货与差评痛点；同时解决烂脸急救期结束后，产品被“闲置”导致回购率低的痛点。</li>
+              <li><strong>工具包应用：</strong>CRM沟通【跟单宝消息推送（使用说明/跨品推荐）】 + 【站内消息（专属客服）】</li>
+              <li><strong>具体做法：</strong>
+                <ul class="sub-list">
+                  <li>下单后（第1天）：通过天猫跟单宝自动向已购会员推送B5修复霜“掌心乳化”科学使用视频说明书，由专业皮肤科医生演示如何“掌心温热乳化至半透明后，按压上脸/局部点涂”，避免因直接厚涂导致搓泥闷痘，从源头降低退款率和差评。</li>
+                  <li>收货后（第14天，急救期结束）：天猫专属客服主动发送关怀消息，询问皮肤修复情况。若皮肤已稳定，则利用跟单宝精准推送跨品回购权益：“您的急救期已过，皮肤进入日常维稳期。推荐搭配理肤泉B5特安修护乳进行日常保湿”，并附赠会员专属回购优惠券，实现从“急救单品”向“日常护肤全套”的转化。</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-content">
+        <h2 class="section-title"><span class="dot"></span>Part 3｜总结</h2>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <h4>当前优势</h4>
+            <p>当前理肤泉天猫会员体系已具备较好的品牌专业度和赠样体验，但在积分价值、购中链路搭配以及购后会员温情运营方面仍有优化空间。</p>
+          </div>
+          <div class="summary-card">
+            <h4>改善方向</h4>
+            <p>通过视觉轻量化改造、购后精准的“教学式触达”以及强化跨品类推荐机制，可进一步提升会员体验，增强用户黏性与复购率，稳步实现品牌的高质量增长。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let current = 0;
+    function goTo(index) {
+      if (!slides[index]) return;
+      current = index;
+      slides[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function goNext() { goTo(Math.min(current + 1, slides.length - 1)); }
+    function goPrev() { goTo(Math.max(current - 1, 0)); }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') goNext();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') goPrev();
+    });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const idx = slides.indexOf(entry.target);
+          if (idx >= 0) current = idx;
+        }
+      });
+    }, { threshold: 0.6 });
+    slides.forEach(slide => observer.observe(slide));
+  </script>
+</body>
+</html>
